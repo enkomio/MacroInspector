@@ -67,7 +67,7 @@ def _check_for_PE_file(raw_string_content):
         string_content = raw_string_content
 
         if raw_string_content[0:4] == '4d5a':
-            # sometimes the strings is not correctl dumped
+            # sometimes the strings is not correctl dumped, it needs more testing
             if not len(raw_string_content) % 2 == 0:
                 raw_string_content += '0'
             string_content = binascii.unhexlify(raw_string_content)
@@ -112,7 +112,7 @@ class ScriptExecutionMonitorEventHandler(EventHandler):
             81FE 0D9D0A80 CMP ESI,800A9D0D
             """
 
-            # Don't use search_hexa becasue seems to be a bug in the implementation: https://github.com/MarioVilas/winappdbg/issues/11
+            # Don't use search_hexa becasue seems to have a bug in the implementation: https://github.com/MarioVilas/winappdbg/issues/11
             file_size = os.path.getsize(module.get_filename())
             module_buffer = process.peek(module.get_base(), module.get_base() + file_size)
             pattern = "\x8B\xF0\x81\xFE\xC4\x88\x0A\x80\x0F\x84....\x81\xFE\x0D\x9D\x0A\x80"
