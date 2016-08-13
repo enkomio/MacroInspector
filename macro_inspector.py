@@ -3,6 +3,8 @@ import re
 import os
 import logging
 import sys
+import struct
+import binascii
 from datetime import datetime
 
 __description__ = 'WORD Macro Inspector'
@@ -60,16 +62,37 @@ def _read_script_source(event):
     process.resume()
 
 
+def _check_for_PE_file(raw_string_content):
+    if len(raw_string_content) > 97:
+        string_content = raw_string_content
+
+        if raw_string_content[0:4] == '4d5a':
+            # sometimes the strings is not correctl dumped
+            if not len(raw_string_content) % 2 == 0:
+                raw_string_content += '0'
+            string_content = binascii.unhexlify(raw_string_content)
+
+        if string_content[0:2] == 'MZ':
+            offset = struct.unpack('<I', string_content[0x3c:0x3c + 4])[0]
+            if len(string_content) > offset + 2 and string_content[offset:offset+2] == 'PE':
+                today = datetime.today()
+                filename = "%d%d%d%d%d%d.bin" % (today.year, today.month, today.day, today.hour, today.minute, today.second)
+                logging.info("Write possible PE file: %s" % filename)
+                with open(filename, 'w') as f:
+                    f.write(string_content)
+
+
 def _read_freed_strings(event, ra, bstrString):
-	try:
-		process = event.get_process()
-		if bstrString:
-			freed_string = process.peek_string(bstrString, fUnicode=True)
-			if len(freed_string) > 5 and freed_string not in _freed_strings:
-				_freed_strings.append(freed_string)
-				logging.info("String: %s" % freed_string)
-	except:
-		pass
+    try:
+        process = event.get_process()
+        if bstrString:
+            freed_string = process.peek_string(bstrString, fUnicode=True)
+            if len(freed_string) > 5 and freed_string not in _freed_strings:
+                _freed_strings.append(freed_string)
+                logging.info("String: %s" % freed_string)
+                _check_for_PE_file(freed_string)
+    except:
+        pass
 
 
 class ScriptExecutionMonitorEventHandler(EventHandler):
