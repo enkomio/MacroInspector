@@ -13,7 +13,7 @@ it is common for malware to hide important information not directly in the macro
 
 ### Usage
 
-The usage is deadly simple, just run: python macro_inspecto.py that's all :) It will loop until a new WINWORD process is found. Now you have to just open the malicious document, enable the macro and then close the document (this will ensure that events that are triggered on the closing document are executed).
+The usage is deadly simple, just run: **python macro_inspecto.py** that's all :) It will loop until a new WINWORD process is found. Now you have to just open the malicious document, enable the macro and then close the document (this will ensure that events that are triggered on the closing document are executed).
 
 ### Dependencies
 
